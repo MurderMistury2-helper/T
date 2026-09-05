@@ -1,5 +1,5 @@
 --// NEON BUTTERFLY LOADING SCREEN
---// Visual-only loading effect
+--// VISUAL ONLY — NO TIMER DISPLAY
 --// Place this LocalScript inside:
 --// StarterPlayer > StarterPlayerScripts
 
@@ -10,10 +10,7 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
---==================================================
 -- SETTINGS
---==================================================
-
 local TOTAL_TIME = 3 * 60 * 60 -- 3 HOURS
 local BUTTERFLY_COUNT = 18
 
@@ -21,10 +18,7 @@ local NEON_PURPLE = Color3.fromRGB(190, 70, 255)
 local NEON_BLUE = Color3.fromRGB(70, 150, 255)
 local DARK = Color3.fromRGB(5, 3, 18)
 
---==================================================
--- SCREEN GUI
---==================================================
-
+-- SCREEN
 local gui = Instance.new("ScreenGui")
 gui.Name = "NeonLoadingScreen"
 gui.IgnoreGuiInset = true
@@ -32,14 +26,12 @@ gui.ResetOnSpawn = false
 gui.DisplayOrder = 999999
 gui.Parent = playerGui
 
--- Background
 local background = Instance.new("Frame")
 background.Size = UDim2.fromScale(1, 1)
 background.BackgroundColor3 = DARK
 background.BorderSizePixel = 0
 background.Parent = gui
 
--- Gradient background
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new({
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(4, 2, 18)),
@@ -49,41 +41,33 @@ gradient.Color = ColorSequence.new({
 gradient.Rotation = 45
 gradient.Parent = background
 
---==================================================
--- NEON PARTICLES
---==================================================
-
+-- PARTICLE LAYER
 local particleLayer = Instance.new("Frame")
 particleLayer.Size = UDim2.fromScale(1, 1)
 particleLayer.BackgroundTransparency = 1
 particleLayer.ClipsDescendants = true
 particleLayer.Parent = background
 
+-- Floating neon particles
 for i = 1, 70 do
 	local dot = Instance.new("Frame")
-
 	local size = math.random(2, 6)
 
 	dot.Size = UDim2.fromOffset(size, size)
-	dot.Position = UDim2.fromScale(
-		math.random(),
-		math.random()
-	)
-
+	dot.Position = UDim2.fromScale(math.random(), math.random())
 	dot.BackgroundColor3 =
 		(math.random(1, 2) == 1)
 		and NEON_PURPLE
 		or NEON_BLUE
 
-	dot.BorderSizePixel = 0
 	dot.BackgroundTransparency = math.random(2, 7) / 10
+	dot.BorderSizePixel = 0
 	dot.Parent = particleLayer
 
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(1, 0)
 	corner.Parent = dot
 
-	-- Glow
 	local glow = Instance.new("UIStroke")
 	glow.Color = dot.BackgroundColor3
 	glow.Thickness = 2
@@ -92,9 +76,6 @@ for i = 1, 70 do
 
 	task.spawn(function()
 		while dot.Parent do
-			local newX = math.random()
-			local newY = math.random()
-
 			local tween = TweenService:Create(
 				dot,
 				TweenInfo.new(
@@ -103,7 +84,10 @@ for i = 1, 70 do
 					Enum.EasingDirection.InOut
 				),
 				{
-					Position = UDim2.fromScale(newX, newY),
+					Position = UDim2.fromScale(
+						math.random(),
+						math.random()
+					),
 					BackgroundTransparency = math.random(2, 8) / 10
 				}
 			)
@@ -114,23 +98,23 @@ for i = 1, 70 do
 	end)
 end
 
---==================================================
--- BUTTERFLY CREATOR
---==================================================
-
+-- BUTTERFLIES
 local function createButterfly()
 
 	local butterfly = Instance.new("Frame")
 	butterfly.Name = "NeonButterfly"
+
 	butterfly.Size = UDim2.fromOffset(
 		math.random(25, 45),
 		math.random(20, 40)
 	)
-	butterfly.BackgroundTransparency = 1
+
 	butterfly.Position = UDim2.fromScale(
 		math.random(),
 		math.random()
 	)
+
+	butterfly.BackgroundTransparency = 1
 	butterfly.ZIndex = 5
 	butterfly.Parent = particleLayer
 
@@ -174,7 +158,7 @@ local function createButterfly()
 	bodyCorner.CornerRadius = UDim.new(1, 0)
 	bodyCorner.Parent = body
 
-	-- Neon glow
+	-- Neon wing glow
 	for _, wing in ipairs({leftWing, rightWing}) do
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = wing.BackgroundColor3
@@ -185,13 +169,7 @@ local function createButterfly()
 
 	-- Flying animation
 	task.spawn(function()
-
 		while butterfly.Parent do
-
-			local newPosition = UDim2.fromScale(
-				math.random(-10, 110) / 100,
-				math.random(-10, 110) / 100
-			)
 
 			local tween = TweenService:Create(
 				butterfly,
@@ -201,7 +179,10 @@ local function createButterfly()
 					Enum.EasingDirection.InOut
 				),
 				{
-					Position = newPosition,
+					Position = UDim2.fromScale(
+						math.random(-10, 110) / 100,
+						math.random(-10, 110) / 100
+					),
 					Rotation = math.random(-25, 25)
 				}
 			)
@@ -209,49 +190,40 @@ local function createButterfly()
 			tween:Play()
 			tween.Completed:Wait()
 		end
-
 	end)
 
-	-- Wing flapping
+	-- Wing animation
 	task.spawn(function()
-
 		while butterfly.Parent do
 
-			local flap1 = TweenService:Create(
+			TweenService:Create(
 				leftWing,
-				TweenInfo.new(0.18, Enum.EasingStyle.Sine),
+				TweenInfo.new(0.18),
 				{Rotation = -45}
-			)
+			):Play()
 
-			local flap2 = TweenService:Create(
+			TweenService:Create(
 				rightWing,
-				TweenInfo.new(0.18, Enum.EasingStyle.Sine),
+				TweenInfo.new(0.18),
 				{Rotation = 45}
-			)
-
-			flap1:Play()
-			flap2:Play()
+			):Play()
 
 			task.wait(0.18)
 
-			local flap3 = TweenService:Create(
+			TweenService:Create(
 				leftWing,
-				TweenInfo.new(0.18, Enum.EasingStyle.Sine),
+				TweenInfo.new(0.18),
 				{Rotation = -15}
-			)
+			):Play()
 
-			local flap4 = TweenService:Create(
+			TweenService:Create(
 				rightWing,
-				TweenInfo.new(0.18, Enum.EasingStyle.Sine),
+				TweenInfo.new(0.18),
 				{Rotation = 15}
-			)
-
-			flap3:Play()
-			flap4:Play()
+			):Play()
 
 			task.wait(0.18)
 		end
-
 	end)
 end
 
@@ -259,10 +231,7 @@ for i = 1, BUTTERFLY_COUNT do
 	createButterfly()
 end
 
---==================================================
--- CENTER CONTAINER
---==================================================
-
+-- MAIN UI
 local main = Instance.new("Frame")
 main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.Position = UDim2.fromScale(0.5, 0.5)
@@ -271,10 +240,7 @@ main.BackgroundTransparency = 1
 main.ZIndex = 20
 main.Parent = background
 
---==================================================
 -- TITLE
---==================================================
-
 local title = Instance.new("TextLabel")
 title.Size = UDim2.fromScale(1, 0.2)
 title.Position = UDim2.fromScale(0, 0)
@@ -291,12 +257,13 @@ titleStroke.Color = NEON_PURPLE
 titleStroke.Thickness = 2
 titleStroke.Parent = title
 
--- Pulsing title
+-- Title pulse
 task.spawn(function()
 	while gui.Parent do
+
 		TweenService:Create(
 			title,
-			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+			TweenInfo.new(1, Enum.EasingStyle.Sine),
 			{TextTransparency = 0.25}
 		):Play()
 
@@ -304,7 +271,7 @@ task.spawn(function()
 
 		TweenService:Create(
 			title,
-			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+			TweenInfo.new(1, Enum.EasingStyle.Sine),
 			{TextTransparency = 0}
 		):Play()
 
@@ -312,10 +279,7 @@ task.spawn(function()
 	end
 end)
 
---==================================================
 -- STATUS
---==================================================
-
 local status = Instance.new("TextLabel")
 status.Size = UDim2.fromScale(1, 0.08)
 status.Position = UDim2.fromScale(0, 0.21)
@@ -327,10 +291,7 @@ status.Font = Enum.Font.GothamMedium
 status.ZIndex = 21
 status.Parent = main
 
---==================================================
 -- PROGRESS BAR
---==================================================
-
 local barBackground = Instance.new("Frame")
 barBackground.Size = UDim2.fromScale(0.85, 0.055)
 barBackground.Position = UDim2.fromScale(0.075, 0.35)
@@ -367,10 +328,7 @@ barGradient.Color = ColorSequence.new({
 })
 barGradient.Parent = bar
 
---==================================================
 -- PERCENTAGE
---==================================================
-
 local percent = Instance.new("TextLabel")
 percent.Size = UDim2.fromScale(1, 0.07)
 percent.Position = UDim2.fromScale(0, 0.42)
@@ -382,47 +340,16 @@ percent.Font = Enum.Font.GothamBold
 percent.ZIndex = 21
 percent.Parent = main
 
---==================================================
--- TIMER
---==================================================
-
-local timerLabel = Instance.new("TextLabel")
-timerLabel.Size = UDim2.fromScale(1, 0.13)
-timerLabel.Position = UDim2.fromScale(0, 0.50)
-timerLabel.BackgroundTransparency = 1
-timerLabel.Text = "03:00:00"
-timerLabel.TextColor3 = Color3.fromRGB(240, 180, 255)
-timerLabel.TextScaled = true
-timerLabel.Font = Enum.Font.GothamBlack
-timerLabel.ZIndex = 21
-timerLabel.Parent = main
-
-local timerStroke = Instance.new("UIStroke")
-timerStroke.Color = NEON_PURPLE
-timerStroke.Thickness = 2
-timerStroke.Parent = timerLabel
-
-local timerInfo = Instance.new("TextLabel")
-timerInfo.Size = UDim2.fromScale(1, 0.06)
-timerInfo.Position = UDim2.fromScale(0, 0.63)
-timerInfo.BackgroundTransparency = 1
-timerInfo.Text = "ESTIMATED PROCESSING TIME • 3 HOURS"
-timerInfo.TextColor3 = Color3.fromRGB(160, 130, 200)
-timerInfo.TextScaled = true
-timerInfo.Font = Enum.Font.Gotham
-timerInfo.ZIndex = 21
-timerInfo.Parent = main
-
---==================================================
 -- MAIN ACCOUNT REMINDER
---==================================================
-
 local reminder = Instance.new("TextLabel")
-reminder.Size = UDim2.fromScale(0.9, 0.12)
-reminder.Position = UDim2.fromScale(0.05, 0.74)
+reminder.Size = UDim2.fromScale(0.9, 0.15)
+reminder.Position = UDim2.fromScale(0.05, 0.60)
 reminder.BackgroundTransparency = 1
+
+-- CHANGED TEXT
 reminder.Text =
-	"⚠  REMEMBER TO USE YOUR MAIN ACCOUNT  ⚠\nFor the intended game experience, please use your main account."
+	"⚠  REMEMBER TO USE YOUR MAIN ACCOUNT  ⚠\n\nTHIS IS ONLY FUNCTIONAL ON YOUR MAIN ACCOUNT."
+
 reminder.TextColor3 = Color3.fromRGB(255, 210, 255)
 reminder.TextScaled = true
 reminder.Font = Enum.Font.GothamBold
@@ -434,16 +361,13 @@ reminderStroke.Color = NEON_PURPLE
 reminderStroke.Thickness = 1.5
 reminderStroke.Parent = reminder
 
---==================================================
--- ANIMATED REMINDER
---==================================================
-
+-- Reminder pulse
 task.spawn(function()
 	while gui.Parent do
 
 		TweenService:Create(
 			reminder,
-			TweenInfo.new(0.8, Enum.EasingStyle.Sine),
+			TweenInfo.new(0.8),
 			{TextTransparency = 0.35}
 		):Play()
 
@@ -451,7 +375,7 @@ task.spawn(function()
 
 		TweenService:Create(
 			reminder,
-			TweenInfo.new(0.8, Enum.EasingStyle.Sine),
+			TweenInfo.new(0.8),
 			{TextTransparency = 0}
 		):Play()
 
@@ -459,13 +383,10 @@ task.spawn(function()
 	end
 end)
 
---==================================================
 -- LOADING DOTS
---==================================================
-
 local dots = Instance.new("TextLabel")
-dots.Size = UDim2.fromScale(1, 0.06)
-dots.Position = UDim2.fromScale(0, 0.91)
+dots.Size = UDim2.fromScale(1, 0.07)
+dots.Position = UDim2.fromScale(0, 0.85)
 dots.BackgroundTransparency = 1
 dots.Text = "LOADING"
 dots.TextColor3 = NEON_BLUE
@@ -481,6 +402,7 @@ task.spawn(function()
 	while gui.Parent do
 
 		count += 1
+
 		if count > 3 then
 			count = 0
 		end
@@ -489,13 +411,9 @@ task.spawn(function()
 
 		task.wait(0.5)
 	end
-
 end)
 
---==================================================
--- TIMER + PROGRESS
---==================================================
-
+-- 3-HOUR VISUAL PROGRESS
 local startTime = os.clock()
 
 RunService.RenderStepped:Connect(function()
@@ -505,48 +423,38 @@ RunService.RenderStepped:Connect(function()
 	end
 
 	local elapsed = os.clock() - startTime
-	local remaining = math.max(TOTAL_TIME - elapsed, 0)
-
-	-- Progress
 	local progress = math.clamp(elapsed / TOTAL_TIME, 0, 1)
 
 	bar.Size = UDim2.fromScale(progress, 1)
 	percent.Text = math.floor(progress * 100) .. "%"
 
-	-- Time
-	local hours = math.floor(remaining / 3600)
-	local minutes = math.floor((remaining % 3600) / 60)
-	local seconds = math.floor(remaining % 60)
+	-- Finish after 3 hours
+	if progress >= 1 then
 
-	timerLabel.Text = string.format(
-		"%02d:%02d:%02d",
-		hours,
-		minutes,
-		seconds
-	)
-
-	-- Finish
-	if remaining <= 0 then
-		timerLabel.Text = "COMPLETE"
-		percent.Text = "100%"
 		status.Text = "PROCESSING COMPLETE • WELCOME"
+		percent.Text = "100%"
 
 		task.wait(2)
 
-		-- Fade out
+		-- Fade everything
 		for _, object in ipairs(gui:GetDescendants()) do
+
 			if object:IsA("TextLabel") then
+
 				TweenService:Create(
 					object,
 					TweenInfo.new(1),
 					{TextTransparency = 1}
 				):Play()
+
 			elseif object:IsA("Frame") then
+
 				TweenService:Create(
 					object,
 					TweenInfo.new(1),
 					{BackgroundTransparency = 1}
 				):Play()
+
 			end
 		end
 
